@@ -7,11 +7,9 @@ import streamlit as st
 
 st.title("Hotel Data Analysis")
 
-
 df = pd.read_csv('hotels_data.csv')
 
 st.write(df.head())
-
 st.write(df.info())
 
 st.write("\nMissing values in the dataset:")
@@ -90,11 +88,11 @@ st.write(f"Standard Deviation: {df['price'].std()}")
 st.write(f"Number of rows: {len(df)}")
 
 # Box Plot to Check for Outliers
-plt.figure(figsize=(10, 6))
-plt.boxplot(x=df['price'])
-plt.title('Box Plot of Hotel Prices (Before Removing Outliers)')
-plt.xlabel('Price (USD)')
-st.pyplot()
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.boxplot(x=df['price'])
+ax.set_title('Box Plot of Hotel Prices (Before Removing Outliers)')
+ax.set_xlabel('Price (USD)')
+st.pyplot(fig)
 
 Q1 = df['price'].quantile(0.25)
 Q3 = df['price'].quantile(0.75)
@@ -110,25 +108,25 @@ st.write(f"Before: {len(df)} rows")
 st.write(f"After: {len(dff)} rows")
 
 # Box Plot After Removing Outliers
-plt.figure(figsize=(10, 6))
-plt.boxplot(x=dff['price'])
-plt.title('Box Plot of Hotel Prices (After Removing Outliers)')
-plt.xlabel('Price (USD)')
-st.pyplot()
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.boxplot(x=dff['price'])
+ax.set_title('Box Plot of Hotel Prices (After Removing Outliers)')
+ax.set_xlabel('Price (USD)')
+st.pyplot(fig)
 
 stats = dff[['price', 'rating', 'number of reviews', 'Distance from Downtown']].describe()
 st.write(stats)
 
-#correlation matrix
+# Correlation matrix
 correlation_matrix = dff[['price', 'rating', 'number of reviews', 'Distance from Downtown']].corr()
 st.write("Correlation Matrix:")
 st.write(correlation_matrix)
 
 # Heatmap of correlations
-plt.figure(figsize=(8, 6))
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
-plt.title('Correlation Heatmap of Variables')
-st.pyplot()
+fig, ax = plt.subplots(figsize=(8, 6))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1, ax=ax)
+ax.set_title('Correlation Heatmap of Variables')
+st.pyplot(fig)
 
 # Average price by category
 avg_price_by_category = dff.groupby('category')['price'].mean().reset_index()
@@ -136,12 +134,29 @@ st.write("Average Price by Category:")
 st.write(avg_price_by_category)
 
 # Scatter plot showing Price vs. Rating with Distance and Reviews
-plt.figure(figsize=(10, 6))
+fig, ax = plt.subplots(figsize=(10, 6))
 sns.scatterplot(x='rating', y='price', size='number of reviews', hue='Distance from Downtown',
-                data=dff, sizes=(50, 500), palette='viridis')
-plt.title('Price vs. Rating with Distance and Number of Reviews')
-plt.xlabel('Rating')
-plt.ylabel('Price')
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+                data=dff, sizes=(50, 500), palette='viridis', ax=ax)
+ax.set_title('Price vs. Rating with Distance and Number of Reviews')
+ax.set_xlabel('Rating')
+ax.set_ylabel('Price')
+ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
-st.pyplot()
+st.pyplot(fig)
+
+# Bar plot for Average Price by Category
+fig, ax = plt.subplots(figsize=(8, 5))
+sns.barplot(x='category', y='price', data=avg_price_by_category, palette='Blues', ax=ax)
+ax.set_title('Average Price by Category')
+ax.set_xlabel('Category')
+ax.set_ylabel('Average Price')
+st.pyplot(fig)
+
+# Histogram for Price Distribution
+fig, ax = plt.subplots(figsize=(8, 5))
+sns.histplot(dff['price'], bins=20, kde=True, color='skyblue', ax=ax)
+ax.set_title('Price Distribution')
+ax.set_xlabel('Price')
+ax.set_ylabel('Count')
+st.pyplot(fig)
+
