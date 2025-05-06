@@ -10,7 +10,7 @@ st.title("Hotel Data Analysis")
 df = pd.read_csv('hotels_data.csv')
 
 st.write(df.head())
-st.write(df.info())
+
 
 st.write("\nMissing values in the dataset:")
 st.write(df.isnull().sum())
