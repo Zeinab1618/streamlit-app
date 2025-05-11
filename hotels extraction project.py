@@ -213,7 +213,7 @@ Hotels with more reviews — do they have better ratings?
 """
 
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.scatterplot(data=df, x='rating', y='number of reviews', hue='category', palette='tab10')
+sns.scatterplot(data=df, x='number of reviews', y='rating', hue='category', palette='tab10')
 ax.set_title('Hotel Rating vs Number of Reviews')
 ax.set_xlabel('Number of Reviews')
 ax.set_ylabel('Rating')
