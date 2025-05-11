@@ -7,10 +7,10 @@ import streamlit as st
 
 st.title("Hotel Data Analysis")
 
+
 df = pd.read_csv('hotels_data.csv')
 
 st.write(df.head())
-
 
 st.write("\nMissing values in the dataset:")
 st.write(df.isnull().sum())
@@ -25,11 +25,9 @@ df.dropna(subset=['name', 'price', 'type'], inplace=True)
 duplicates = df.duplicated().sum()
 st.write(f"Number of duplicate rows: {duplicates}")
 
-# Remove 'US$' and commas, convert price to float
 df['price'] = df['price'].apply(lambda x: float(re.sub(r'[^\d.]', '', x)))
 st.write("Sample Cleaned Prices:\n", df['price'].head())
 
-# Extract numeric value from 'number of reviews' using Regex
 def clean_reviews(review_str):
     if pd.isna(review_str):
         return 0
@@ -39,7 +37,6 @@ def clean_reviews(review_str):
 df['number of reviews'] = df['number of reviews'].apply(clean_reviews)
 st.write("Sample Cleaned Number of Reviews:\n", df['number of reviews'].head())
 
-# Extract numeric value and ensure it's in kilometers
 def clean_distance(distance_str):
     if pd.isna(distance_str):
         return None
@@ -50,9 +47,9 @@ df['Distance from Downtown'] = df['Distance from Downtown'].apply(clean_distance
 st.write("Sample Cleaned Distances:\n", df['Distance from Downtown'].head())
 
 def clean_name(name):
-    # Remove special characters, multiple spaces, and trim the name
+   
     cleaned = re.sub(r'\s+', ' ', re.sub(r'[^\w\s-]', '', name)).strip()
-    return cleaned.title()  # Capitalize first letter of each word
+    return cleaned.title() 
 
 df['name'] = df['name'].apply(clean_name)
 st.write("Sample Cleaned Names:\n", df['name'].head())
@@ -64,21 +61,18 @@ category_counts = df['category'].value_counts()
 st.write("Category Counts:")
 st.write(category_counts)
 
-# Ensure rating is numeric
+
 df['rating'] = pd.to_numeric(df['rating'], errors='coerce')
 
-# Change column types for consistency
 df['price'] = df['price'].astype(float)
 df['number of reviews'] = df['number of reviews'].astype(int)
 df['Distance from Downtown'] = df['Distance from Downtown'].astype(float)
 df['rating'] = df['rating'].astype(float)
 
-# Display missing values after cleaning and data types
 st.write("Missing Values After Cleaning:\n", df.isnull().sum())
 st.write("Data Types:\n", df.dtypes)
 st.write("Sample Cleaned Data:\n", df.head())
 
-# Show price statistics
 st.write("Price Statistics Before Cleaning:")
 st.write(f"Mean: {df['price'].mean()}")
 st.write(f"Median: {df['price'].median()}")
@@ -87,7 +81,6 @@ st.write(f"Max: {df['price'].max()}")
 st.write(f"Standard Deviation: {df['price'].std()}")
 st.write(f"Number of rows: {len(df)}")
 
-# Box Plot to Check for Outliers
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.boxplot(x=df['price'])
 ax.set_title('Box Plot of Hotel Prices (Before Removing Outliers)')
@@ -103,11 +96,9 @@ upper_bound = Q3 + 1.5 * IQR
 
 dff = df[(df['price'] >= lower_bound) & (df['price'] <= upper_bound)]
 
-# Show row count before and after filtering outliers
 st.write(f"Before: {len(df)} rows")
 st.write(f"After: {len(dff)} rows")
 
-# Box Plot After Removing Outliers
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.boxplot(x=dff['price'])
 ax.set_title('Box Plot of Hotel Prices (After Removing Outliers)')
@@ -117,46 +108,114 @@ st.pyplot(fig)
 stats = dff[['price', 'rating', 'number of reviews', 'Distance from Downtown']].describe()
 st.write(stats)
 
-# Correlation matrix
-correlation_matrix = dff[['price', 'rating', 'number of reviews', 'Distance from Downtown']].corr()
-st.write("Correlation Matrix:")
-st.write(correlation_matrix)
+# keep the outliers near 2000 USD in Box Plot
+# because they likely represent real prices for luxury hotels in cities like Paris or Tokyo, which can reasonably reach such values.
+# and removing them might exclude valuable insights about premium hotel pricing.
 
-# Heatmap of correlations
-fig, ax = plt.subplots(figsize=(8, 6))
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1, ax=ax)
-ax.set_title('Correlation Heatmap of Variables')
-st.pyplot(fig)
+"""##**1. Scatter Plot:** Price Vs Rating
+Do better-rated hotels cost more?
+"""
 
-# Average price by category
-avg_price_by_category = dff.groupby('category')['price'].mean().reset_index()
-st.write("Average Price by Category:")
-st.write(avg_price_by_category)
-
-# Scatter plot showing Price vs. Rating with Distance and Reviews
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.scatterplot(x='rating', y='price', size='number of reviews', hue='Distance from Downtown',
-                data=dff, sizes=(50, 500), palette='viridis', ax=ax)
-ax.set_title('Price vs. Rating with Distance and Number of Reviews')
+sns.scatterplot(data=df, x='rating', y='price')
+ax.set_title('Hotel Price vs Rating')
 ax.set_xlabel('Rating')
-ax.set_ylabel('Price')
-ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.tight_layout()
+ax.set_ylabel('Price (USD)')
+ax.grid(True)
 st.pyplot(fig)
 
-# Bar plot for Average Price by Category
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.barplot(x='category', y='price', data=avg_price_by_category, palette='Blues', ax=ax)
-ax.set_title('Average Price by Category')
+"""##**2. Scatter Plot:** Distance from Downtown vs. Price
+
+This shows if hotels closer to downtown are more expensive.
+
+"""
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.scatterplot(data=df, x='Distance from Downtown', y='price')
+ax.set_title('Hotel Price vs Distance from Downtown')
+ax.set_xlabel('Distance from Downtown (km)')
+ax.set_ylabel('Price (USD)')
+ax.grid(True)
+st.pyplot(fig)
+
+"""##**3. Bar Plot:** Hotel Category Counts (Excellent, Very Good, Good)
+Shows how hotels are rated overall.
+"""
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.countplot(data=df, x='category', hue='category', order=df['category'].value_counts().index, palette='viridis', legend=False)
+ax.set_title('Hotel Category Distribution')
 ax.set_xlabel('Category')
-ax.set_ylabel('Average Price')
+ax.set_ylabel('Number of Hotels')
+ax.grid(axis='y')
 st.pyplot(fig)
 
-# Histogram for Price Distribution
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.histplot(dff['price'], bins=20, kde=True, color='skyblue', ax=ax)
-ax.set_title('Price Distribution')
-ax.set_xlabel('Price')
-ax.set_ylabel('Count')
+"""##**4. Correlation Heatmap**
+Shows relationships between numbers: price, rating, distance, reviews
+"""
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.heatmap(df[['price', 'rating', 'number of reviews', 'Distance from Downtown']].corr(), annot=True, cmap='coolwarm')
+ax.set_title('Correlation Between Hotel Features')
 st.pyplot(fig)
 
+"""##**5. Line Plot:** Average Hotel Price vs. Rating
+See if better-rated hotels cost more on average.
+"""
+
+
+price_rating = df.groupby('rating')['price'].mean().reset_index()
+
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.lineplot(data=price_rating, x='rating', y='price', marker='o')
+ax.set_title('Average Hotel Price vs Rating')
+ax.set_xlabel('Rating')
+ax.set_ylabel('Average Price (USD)')
+ax.grid(True)
+st.pyplot(fig)
+
+"""##**6. Top 10 Most Expensive Hotels**
+Show the most luxurious hotels.
+"""
+
+
+df = df[df['name'].apply(lambda x: bool(re.match('^[a-zA-Z0-9\s.,&\'-]+$', x)))]
+
+top10_expensive = df.sort_values('price', ascending=False).head(10)
+
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.barplot(data=top10_expensive, x='price', y='name', hue='name', palette='rocket', dodge=False, legend=False)
+ax.set_title('Top 10 Most Expensive Hotels')
+ax.set_xlabel('Price (USD)')
+ax.set_ylabel('Hotel Name')
+ax.grid(axis='x')
+st.pyplot(fig)
+
+"""##**7. Top 10 Closest Hotels to Downtown**
+See which hotels are the nearest.
+
+"""
+
+top10_closest = df.sort_values('Distance from Downtown', ascending=True).head(10)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.barplot(data=top10_closest, x='Distance from Downtown', y='name', hue='name', palette='crest', legend=False)
+ax.set_title('Top 10 Closest Hotels to Downtown')
+ax.set_xlabel('Distance (km)')
+ax.set_ylabel('Hotel Name')
+ax.grid(axis='x')
+st.pyplot(fig)
+
+"""##**8.Scatter Plot:** Reviews vs. Rating
+Hotels with more reviews — do they have better ratings?
+"""
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.scatterplot(data=df, x='number of reviews', y='rating', hue='category', palette='tab10')
+ax.set_title('Hotel Rating vs Number of Reviews')
+ax.set_xlabel('Number of Reviews')
+ax.set_ylabel('Rating')
+ax.grid(True)
+st.pyplot(fig)
