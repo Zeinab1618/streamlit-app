@@ -217,5 +217,6 @@ sns.scatterplot(data=df, x='number of reviews', y='rating', hue='category', pale
 ax.set_title('Hotel Rating vs Number of Reviews')
 ax.set_xlabel('Number of Reviews')
 ax.set_ylabel('Rating')
+ax.set_xscale('log')
 ax.grid(True)
 st.pyplot(fig)
