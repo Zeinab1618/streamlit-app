@@ -220,3 +220,15 @@ ax.set_ylabel('Rating')
 ax.set_xscale('log')
 ax.grid(True)
 st.pyplot(fig)
+
+# Upload to MongoDB
+uri = "mongodb+srv://nadaassem696:4KFxEJAXeoYlAPmu@cluster0.dikuegl.mongodb.net/?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true"
+
+client = MongoClient(uri, tlsCAFile=certifi.where())
+db = client['my_database']
+collection = db['processed_data']
+
+data = dff.to_dict("records")
+collection.insert_many(data)
+# for doc in collection.find():
+#     print(doc)
