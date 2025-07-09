@@ -4,7 +4,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt  
 import re
 import streamlit as st
-
+from pymongo import MongoClient
+import certifi
 st.title("Hotel Data Analysis")
 
 
