@@ -228,13 +228,20 @@ client = MongoClient(uri)
 db = client['my_database']
 collection = db['processed_data']
 
-data = dff.to_dict("records")
+import streamlit as st
 
-if st.button("Upload Cleaned Data to MongoDB"):
-    if collection.count_documents({}) == 0:
-        collection.insert_many(data)
-        st.success("Data uploaded to MongoDB!")
-    else:
-        st.info("Data already exists.")
-# for doc in collection.find():
-#     print(doc)
+try:
+    st.write("Mongo URI:", st.secrets["mongo"]["uri"][:10] + "...")  # Show first 10 chars only
+except Exception as e:
+    st.error(f"Secrets error: {e}")
+
+# data = dff.to_dict("records")
+
+# if st.button("Upload Cleaned Data to MongoDB"):
+#     if collection.count_documents({}) == 0:
+#         collection.insert_many(data)
+#         st.success("Data uploaded to MongoDB!")
+#     else:
+#         st.info("Data already exists.")
+# # for doc in collection.find():
+# #     print(doc)
