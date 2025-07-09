@@ -223,13 +223,18 @@ ax.grid(True)
 st.pyplot(fig)
 
 # Upload to MongoDB
-uri = "mongodb+srv://nadaassem696:4KFxEJAXeoYlAPmu@cluster0.dikuegl.mongodb.net/?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true"
-
-client = MongoClient(uri, tlsCAFile=certifi.where())
+uri = st.secrets["mongo"]["uri"]
+client = MongoClient(uri)
 db = client['my_database']
 collection = db['processed_data']
 
 data = dff.to_dict("records")
-collection.insert_many(data)
+
+if st.button("Upload Cleaned Data to MongoDB"):
+    if collection.count_documents({}) == 0:
+        collection.insert_many(data)
+        st.success("Data uploaded to MongoDB!")
+    else:
+        st.info("Data already exists.")
 # for doc in collection.find():
 #     print(doc)
