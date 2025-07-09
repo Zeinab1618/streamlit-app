@@ -223,17 +223,11 @@ ax.grid(True)
 st.pyplot(fig)
 
 # Upload to MongoDB
-uri = st.secrets["mongo"]["uri"]
-client = MongoClient(uri)
-db = client['my_database']
-collection = db['processed_data']
+# uri = "mongodb+srv://nadaassem696:4KFxEJAXeoYlAPmu@cluster0.dikuegl.mongodb.net/?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true"
 
-import streamlit as st
-
-try:
-    st.write("Mongo URI:", st.secrets["mongo"]["uri"][:10] + "...")  # Show first 10 chars only
-except Exception as e:
-    st.error(f"Secrets error: {e}")
+# client = MongoClient(uri, tlsCAFile=certifi.where())
+# db = client['my_database']
+# collection = db['processed_data']
 
 # data = dff.to_dict("records")
 
