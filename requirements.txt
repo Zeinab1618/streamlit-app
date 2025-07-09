@@ -1,3 +1,5 @@
+certifi
+pymongo
 pandas
 numpy
 seaborn
